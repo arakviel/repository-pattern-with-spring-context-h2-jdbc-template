@@ -20,7 +20,7 @@ public class PostRepositoryImpl
 
     @Override
     protected List<String> tableAttributes() {
-        return List.of("user_id", "title", "body", "published_at", "created_at", "updated_at");
+        return tableAttributes(Post.class);
     }
 
     @Override

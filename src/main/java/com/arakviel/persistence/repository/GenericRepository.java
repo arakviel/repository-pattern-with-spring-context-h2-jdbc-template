@@ -1,13 +1,11 @@
 package com.arakviel.persistence.repository;
 
-import static java.lang.StringTemplate.STR;
-
-import com.arakviel.persistence.config.ConnectionManager;
 import com.arakviel.persistence.entity.GenericEntity;
-import com.arakviel.persistence.entity.User;
+import static java.lang.StringTemplate.STR;
+import com.arakviel.persistence.config.ConnectionManager;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -128,6 +126,40 @@ public abstract class GenericRepository<T extends GenericEntity> implements Repo
         return jdbcTemplate.update(sql, id);
     }
 
+    protected List<String> tableAttributes(Class<T> tClass) {
+        Field[] fields = tClass.getDeclaredFields();
+        List<String> names = new ArrayList<>();
+
+        for (Field field : fields) {
+            String fieldName = convertToSnakeCase(field.getName());
+
+            if (field.getType().isPrimitive()) {
+                names.add(fieldName.toLowerCase());
+            } else {
+                String fieldPackage = field.getType().getPackage() != null ? field.getType().getPackage().getName() : "";
+                if (!fieldName.equals("id")) {
+                    if (fieldPackage.equals(tClass.getPackage().getName())) {
+                        names.add(fieldName.toLowerCase() + "_id");
+                    } else {
+                        names.add(fieldName.toLowerCase());
+                    }
+                }
+            }
+        }
+
+        return names;
+    }
+
+    private static String convertToSnakeCase(String input) {
+        StringBuilder result = new StringBuilder();
+        for (String w : input.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])")) {
+            result.append(w).append("_");
+        }
+
+        String s = result.toString();
+        return s.toLowerCase().substring(0,s.length()-1);
+
+    }
     protected abstract List<String> tableAttributes();
     protected abstract List<Object> tableValues(T entity);
 }
