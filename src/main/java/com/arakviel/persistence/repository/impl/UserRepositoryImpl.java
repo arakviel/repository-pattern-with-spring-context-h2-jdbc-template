@@ -8,8 +8,6 @@ import com.arakviel.persistence.repository.mapper.UserMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.context.annotation.Primary;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -26,9 +24,10 @@ public class UserRepositoryImpl
         return findBy("login", login);
     }
 
+
     @Override
     protected List<String> tableAttributes() {
-        return List.of("login", "password", "age");
+        return tableAttributes(User.class);
     }
 
     @Override
